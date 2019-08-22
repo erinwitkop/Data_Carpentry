@@ -2,14 +2,16 @@
 
 Details:
 
-Time: Thursday 1-5 and Friday 8:30-12 - lunch will be served both days
-at 12. Audience: future Intro Bio TA's Experience Level: Novice
+-   Time: Thursday 1-5 and Friday 8:30-12 - lunch will be served both
+    days at 12.
+-   Audience: future Intro Bio TA's
+-   Experience Level: Novice
 
 ### Agenda
 
 1.  Introduction: Code of Conduct, Etherpad, sticky notes
 2.  Brief introduction to Ecology Dataset
-3.  Basic intro to R
+3.  Basics of R
 4.  Manipulating Ecology Dataset in R with dplyr
 5.  Plotting dataset in R
 6.  Loading Messy data into R
@@ -28,10 +30,11 @@ analysis.
 In order to foster a positive and professional learning environment we
 encourage the following kinds of behaviors in all platforms and events:
 
--Use welcoming and inclusive language -Be respectful of different
-viewpoints and experiences -Gracefully accept constructive criticism
--Focus on what is best for the community -Show courtesy and respect
-towards other community members
+-   Use welcoming and inclusive language
+-   Be respectful of different viewpoints and experiences
+-   Gracefully accept constructive criticism
+-   Focus on what is best for the community
+-   Show courtesy and respect towards other community members
 
 1.  Intro to the Etherpad we will be using for posting questions,
     comments, ideas
@@ -57,6 +60,8 @@ However, we will download them directly from R during the lessons when
 we need them.
 
 ### Basics of R
+
+#### R and R Studio Basics
 
 Before we start, please have both R and RStudio both downloaded and
 installed on your computer -Download R <https://cran.cnr.berkeley.edu>
@@ -97,9 +102,72 @@ in.
 R Studio uses a "project" interface. Rstudio can create a new project
 directory for you, or you can work out of an existing directory.
 
-You can also embed plots, for example:
+Lets make a new project for this lesson. - To do this go to File &gt;
+New Project. &gt; Choose New Directory &gt; Choose New Project. - Enter
+a name for this new folder (or “directory”), and choose a convenient
+location for it. This will be your working directory for the rest of the
+day (e.g., ~/data-carpentry). - Click on Create Project. - Create a new
+R script by going to File &gt; New File &gt; R script
 
-![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/pressure-1.png)
+1.  Finding help and troubleshooting
 
-Note that the `echo = FALSE` parameter was added to the code chunk to
-prevent printing of the R code that generated the plot.
+When you are unsure of how a function works you can type the following
+in the context.
+
+    ?head()
+
+When you get an error message you are unsure how to interpret it, start
+by googling the issue. There are several online platforms for code
+developers, like stackoverflow.com
+
+### Manipulating Ecology Data Set
+
+We are studying the species repartition and weight of animals caught in
+plots in our study area. The dataset is stored as a comma separated
+value (CSV) file. Each row holds information for a single animal.
+
+#### Load packages
+
+R has many, many functions that it can do already. However, developers
+have created "packages" which contain groups of other specialized
+functions. To be able to use these packages, they first have to be
+installed and then loaded. To load a package you will load it as a
+`library`. Today we will be using the `tidyverse` and `RSQLite`
+packages.
+
+    # Install packages (always comment out your code using the hashtag to explain what a code chunk is doing)
+    # Packages only need to be installed once
+    #install.packages(tidyverse) #put object you will work on inside parentheses
+    #install.packages(RSQLite)
+
+
+    # Load libraries
+    # Libraries need to be loaded every time you re-open your R session
+    library(tidyverse)
+
+    ## ── Attaching packages ───────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+
+    ## ✔ ggplot2 3.2.1     ✔ purrr   0.3.2
+    ## ✔ tibble  2.1.3     ✔ dplyr   0.8.3
+    ## ✔ tidyr   0.8.3     ✔ stringr 1.4.0
+    ## ✔ readr   1.3.1     ✔ forcats 0.4.0
+
+    ## ── Conflicts ──────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ✖ dplyr::filter() masks stats::filter()
+    ## ✖ dplyr::lag()    masks stats::lag()
+
+    library(RSQLite)
+
+We are now ready to use these packages.
+
+#### Load files into R
+
+We can download the file directly from the internet using the following
+function.
+
+    download.file(url="https://ndownloader.figshare.com/files/2292169",
+                  destfile = "portal_data_joined.csv")
+
+The data can now be loaded using the `read.csv` function.
+
+    surveys <- read.csv("portal_data_joined.csv")
