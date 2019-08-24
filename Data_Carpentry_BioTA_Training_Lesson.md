@@ -146,14 +146,14 @@ installed and then loaded. To load a package you will load it as a
     # Libraries need to be loaded every time you re-open your R session
     library(tidyverse)
 
-    ## ── Attaching packages ─────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+    ## ── Attaching packages ──────────────────────────────────────────────────────── tidyverse 1.2.1 ──
 
     ## ✔ ggplot2 3.2.1     ✔ purrr   0.3.2
     ## ✔ tibble  2.1.3     ✔ dplyr   0.8.3
     ## ✔ tidyr   0.8.3     ✔ stringr 1.4.0
     ## ✔ readr   1.3.1     ✔ forcats 0.4.0
 
-    ## ── Conflicts ────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ─────────────────────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
 
@@ -374,10 +374,185 @@ arrange the output.
       count(sex, species_id) %>%
       arrange(species_id, desc(n))
 
+### Exporting data
+
+In preparation for our next lesson on plotting, we are going to prepare
+a cleaned up version of the data set that doesn’t include any missing
+data.
+
+    surveys_complete <- surveys %>%
+      filter(!is.na(weight),           # remove missing weight
+             !is.na(hindfoot_length),  # remove missing hindfoot_length
+             !is.na(sex))                # remove missing sex
+
+Now we are going to remove observations for rare species so we can plot
+how species abundances change through time.
+
+    ## Extract the most common species_id
+    species_counts <- surveys_complete %>%
+        count(species_id) %>% 
+        filter(n >= 50)
+
+    ## Only keep the most common species
+    surveys_complete <- surveys_complete %>%
+      filter(species_id %in% species_counts$species_id)
+
+To check that everyone has the same data, check that `surveys_complete`
+has 30463 rows and 13 columns by typing `dim(surveys_complete)`.
+
+To export this data, we can use the `read.csv()` function.
+
+    write.csv(surveys_complete, file ="surveys_complete.csv") # use the file = to name the file and set the path to the file
+
 ### Visualizing Data
 
 Now we will discuss how to visualize our dataset using a very popular
-package called `ggplot2`.
+package called `ggplot2`. In this section we will be creating boxplots,
+scatterplots, and timeseries plots. We'll describe what faceting is and
+how to use it in `ggplot2`, and also manipulate the aesthetics of plots.
+
+The `ggplot2` package is included in the `tidyverse` package which we
+already loaded, so we don't need to load it again.
+
+`ggplot2` likes for data to be "long" format (rather than "wide"
+format), which means there is a column for every dimension and a row for
+each observation. In the next section of the lesson we will discuss how
+to change wide data to long format for use in plotting.
+
+Plots in ggplot are built in a step-by-step process, where you add
+graphics in different layers to customize the plot. This allows for
+increased flexibility.
+
+To build a basic ggplot plot, the following format is used
+`ggplot(data = <DATA>, mapping = aes(<MAPPINGS>)) +  <GEOM_FUNCTION>()`
+
+Lets start with calling the data. We will be using our subset
+`surveys_complete` dataset we created above.
+
+    ggplot(data=surveys_complete)
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/plot1-1.png)
+
+This command will generate the basic grid where your mapping will appear
+when you set the mapping aesthetics.
+
+    ggplot(data=surveys_complete, mapping = aes(x= weight, y=hindfoot_length)) 
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/aes-1.png)
+
+    # the aes() function defines the variables that will be used for plotting and how to present them, you can set color, x/y position, and size of plots in the aes() function. 
+
+Next we are ready to plot our actual data by adding a "geom", which are
+graphical representations of the data. There are a variety of geoms that
+can be used.
+`*`geom\_point()`for scatter plots, dot plots, etc.   *`geom\_boxplot()`for, well, boxplots!   *`geom\_line()`for trend lines, time series, etc.`
+
+    ggplot(data=surveys_complete, mapping = aes(x= weight, y=hindfoot_length))  + geom_point()
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/geom-1.png)
+
+You can also save the basic aesthetics of a plot to a variable that you
+can call and then add different geoms or aspects to it using `+`.
+
+    surveys_plot <- ggplot(data=surveys_complete, mapping = aes(x= weight, y=hindfoot_length))  
+    surveys_plot + geom_point()
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/save_geom-1.png)
+
+Note that in a `ggplot` function when adding new layers using the `+`
+symbol, the plus symbol needs to be at the end of the preceding line,
+rather than on the next line. For example:
+
+    # This is correct
+    surveys_plot +
+      geom_point() 
+
+    # This will cause an error and will not work
+    surveys_plot 
+     + geom_point()
+
+##### Customizing plots
+
+We can add colors within the `geom_point` call.
+
+    ggplot(data=surveys_complete, mapping = aes(x= weight, y=hindfoot_length)) +
+    geom_point(color = "blue")
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/color-1.png)
+
+We can also color every species in the data differently by doing the
+following:
+
+    ggplot(data=surveys_complete, mapping = aes(x= weight, y=hindfoot_length)) +
+    geom_point(aes(color = species_id))
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/color_diff-1.png)
+
+Colors can also be set inside the initial `aes()` mapping:
+
+    ggplot(data=surveys_complete, mapping = aes(x= weight, y=hindfoot_length, color = species_id)) +
+    geom_point()
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/color_diff2-1.png)
+
+##### Boxplots
+
+We can also use a boxplot to explore the distribution of weight within
+species.
+
+    ggplot(data=surveys_complete, mapping = aes(x= species_id, y=weight)) +
+    geom_boxplot()
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/boxplot-1.png)
+
+We can add points to our boxplot by using `geom_jitter` and setting the
+`alpha` parameter, which makes the points a level of transparency
+defined by the user. We can then set the color inside our `geom_jitter`.
+
+    ggplot(data = surveys_complete, mapping = aes(x = species_id, y = weight)) +
+        geom_boxplot(alpha = 0) +
+        geom_jitter(alpha = 0.3, color = "tomato")
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/boxplot_jitter-1.png)
+
+#### Time series data
+
+Let’s calculate number of counts per year for each genus. First we need
+to group the data and count records within each group:
+
+    yearly_counts <- surveys_complete %>%
+      count(year, genus)
+
+Time series data can be visualized as a line plot with years on the x
+axis and counts on the y axis:
+
+    ggplot(data = yearly_counts, mapping = aes(x = year, y = n)) +
+         geom_line()
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/time_series_plot-1.png)
+
+Unfortunately, this does not work because we plotted data for all the
+genera together. We need to tell ggplot to draw a line for each genus by
+modifying the aesthetic function to include `group = genus`.
+
+    ggplot(data = yearly_counts, mapping = aes(x = year, y = n, group = genus)) +
+        geom_line()
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/group_genus-1.png)
+
+We can distinguish the different genera in the plot by specifying the
+colors.
+
+    ggplot(data = yearly_counts, mapping = aes(x = year, y = n, color = genus)) +
+        geom_line()
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/line_color-1.png)
+
+##### Faceting
+
+#### Changing ggplot themes
+
+#### Arranging and Exporting plots
 
 ### Importing and working with messy data
 
