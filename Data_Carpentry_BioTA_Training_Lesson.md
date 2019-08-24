@@ -146,14 +146,14 @@ installed and then loaded. To load a package you will load it as a
     # Libraries need to be loaded every time you re-open your R session
     library(tidyverse)
 
-    ## ── Attaching packages ────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+    ## ── Attaching packages ─────────────────────────────────────────────────────── tidyverse 1.2.1 ──
 
     ## ✔ ggplot2 3.2.1     ✔ purrr   0.3.2
     ## ✔ tibble  2.1.3     ✔ dplyr   0.8.3
     ## ✔ tidyr   0.8.3     ✔ stringr 1.4.0
     ## ✔ readr   1.3.1     ✔ forcats 0.4.0
 
-    ## ── Conflicts ───────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ────────────────────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
 
@@ -285,4 +285,109 @@ function.
     surveys %>% 
       filter(!is.na(weight)) %>% # the exclamation point means "not"
       mutate(weight_kg = weight/1000) %>% 
-      head() # piping to head will only print out the beginning of the output
+      head() # piping to head will only print out the beginning of the output 
+
+The `is.na()` function determines when something is an `NA`. The `!`
+negates the result, so we're asking for every row where weight is not an
+`NA`.
+
+#### Challenge
+
+Create new data frame from the `surveys` data that contains only the
+`species_id` column and a new column you make called `hindfoot_half`
+containing values that are half the `hindfoot_length` value. In the new
+`hindfoot_half` column make sure there are no `NA`s and that all values
+are less than 30.
+
+    surveys_hindfoot_half <- surveys %>% 
+      filter(!is.na(hindfoot_length)) %>%
+      mutate(hindfoot_half = hindfoot_length /2) %>%
+      filter(hindfoot_half < 30) %>%
+      select(species_id, hindfoot_half)
+
+#### Split-apply-combine analysis and the summarize() function
+
+Many analyses use a *split-apply-combine* approach, where you first
+split the data into groups, then perform a set of analysis steps, and
+then combine the results. `dplyr` makes this easy using the
+`summarize()` function.
+
+##### `summarize()` function
+
+The `summarize()` function combines groups of data into a single-row
+summary of that group. It is often used following `group_by()` which
+takes as arguments column names that contain **categorical** variables
+for which you want to calculate summary statistics.
+
+For example, to compute mean `weight` by sex:
+
+    surveys %>% 
+      group_by(sex) %>%
+      summarize(mean_weight = mean(weight, na.rm =TRUE))
+
+Multiple columns of categorical values can be grouped at once using the
+`group_by()` function. Additionally, the `summarize()` function can also
+summarize multiple variables at once. For example, if we wanted to ger
+rid of any `NA`s in the data, group our data both by sex and species id,
+and then calculate the mean weight and the minimum weight, we could do
+the following.
+
+    surveys %>%
+      filter(!is.na(weight)) %>%
+      group_by(sex, species_id) %>%
+      summarize(mean_weight = mean(weight), 
+                min_weight = min(weight))
+
+Sometimes we want the output of a function to be arranged in a
+particular order. We can do this using the `arrange()` function at the
+end of our data. For example, we can arrange our data in descending
+order using the following:
+
+    surveys  %>%
+       filter(!is.na(weight)) %>%
+      group_by(sex, species_id) %>%
+      summarize(mean_weight = mean(weight),
+                min_weight = min(weight)) %>%
+      arrange(desc(mean_weight))
+
+##### Counting
+
+When we work with data, we often want to know how many observations are
+in a particular group. We can do this with the `dplyr` function
+`count()`. If we wanted to count the number of rows for each sex, we
+could use the following function.
+
+    surveys %>%
+      count(sex)
+
+What other function have we learned could be used to do the same thing?
+Combining the `group_by()` function and the `summarize()` function.
+
+    surveys %>%
+      group_by(sex) %>%
+      summarize(count = n()) # the n function counts the number of items
+
+Just like `group_by()`, we can `count()` using multiple variables, also
+arrange the output.
+
+    surveys %>% 
+      count(sex, species_id) %>%
+      arrange(species_id, desc(n))
+
+### Visualizing Data
+
+Now we will discuss how to visualize our dataset using a very popular
+package called `ggplot2`.
+
+### Importing and working with messy data
+
+Now we will learn about reshaping messy data, such as what you might
+encounter during labs.
+
+#### Code used to create messy data
+
+surveys\_messy &lt;- spread(surveys, plot\_type, hindfoot\_length)
+surveys\_messy &lt;- head(surveys\_messy, n=30)
+write.csv(file="surveys\_messy.csv", surveys\_messy) \# In excel I
+sprinkled in a few challenges that could occur when you have \# multiple
+people recording data
