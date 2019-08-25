@@ -1,4 +1,5 @@
-### Lesson Plan for Bio TA R Training
+Lesson Plan for Bio TA R Training
+=================================
 
 Details:
 
@@ -7,7 +8,8 @@ Details:
 -   Audience: future Intro Bio TA's
 -   Experience Level: Novice
 
-### Agenda
+Agenda
+======
 
 1.  Introduction: Code of Conduct, Etherpad, sticky notes
 2.  Brief introduction to Ecology Dataset
@@ -16,7 +18,8 @@ Details:
 5.  Plotting dataset in R
 6.  Loading Messy data into R
 
-### Introduction
+Introduction
+============
 
 1.  Introduce Myself and Bob
 
@@ -47,7 +50,13 @@ Please put your red sticky note on top of your computer if you have an
 issue and a helper will come around. Please put up the green sticky note
 when you have completed a task or are ready to move on.
 
-### Introduction to Ecology Dataset
+1.  Introduction around the room for participants.
+
+-   Who are you and why are you taking this workshop?
+-   Where do you hope to apply the skills learned?
+
+Introduction to Ecology Dataset
+===============================
 
 We will be working from the Ecology Data Carpentry Lesson. The material
 is available later for your use at the Data Carpentry website.
@@ -59,9 +68,11 @@ here: <https://doi.org/10.6084/m9.figshare.1314459>
 However, we will download them directly from R during the lessons when
 we need them.
 
-### Basics of R
+Basics of R
+===========
 
-#### R and R Studio Basics
+R and R Studio Basics
+---------------------
 
 Before we start, please have both R and RStudio both downloaded and
 installed on your computer -Download R <https://cran.cnr.berkeley.edu>
@@ -120,13 +131,15 @@ When you get an error message you are unsure how to interpret it, start
 by googling the issue. There are several online platforms for code
 developers, like stackoverflow.com
 
-### Manipulating Ecology Data Set
+Manipulating Ecology Data Set
+=============================
 
 We are studying the species repartition and weight of animals caught in
 plots in our study area. The dataset is stored as a comma separated
 value (CSV) file. Each row holds information for a single animal.
 
-#### Load packages
+Load packages
+-------------
 
 R has many, many functions that it can do already. However, developers
 have created "packages" which contain groups of other specialized
@@ -146,14 +159,14 @@ installed and then loaded. To load a package you will load it as a
     # Libraries need to be loaded every time you re-open your R session
     library(tidyverse)
 
-    ## ── Attaching packages ──────────────────────────────────────────────────── tidyverse 1.2.1 ──
+    ## ── Attaching packages ────────────────────────── tidyverse 1.2.1 ──
 
     ## ✔ ggplot2 3.2.1     ✔ purrr   0.3.2
     ## ✔ tibble  2.1.3     ✔ dplyr   0.8.3
     ## ✔ tidyr   0.8.3     ✔ stringr 1.4.0
     ## ✔ readr   1.3.1     ✔ forcats 0.4.0
 
-    ## ── Conflicts ─────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ───────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
 
@@ -208,14 +221,16 @@ and content of each column using the `summary()` function.
 
     summary(surveys)
 
-### Data Manipulation using `dplyr` and `tidyr`
+Data Manipulation using `dplyr` and `tidyr`
+===========================================
 
 `dplyr` is a package for making tabular data manipulation easier. It
 pairs nicely with tidyr which enables you to swiftly convert between
 different data formats for plotting and analysis. Both `dplyr` and
 `tidyr` are included in the tidyverse package.
 
-#### Selecting columns and filtering rows
+Selecting columns and filtering rows
+------------------------------------
 
 To select columns of a data frame, use `select()`.
 
@@ -230,7 +245,8 @@ To filter rows based on specific criteria use `filter()`.
 
     filter(surveys, year ==1995)
 
-#### Pipes
+Pipes
+-----
 
 Can you select and filter at the same time? Yes! This can be done best
 via the using of piping, or when you pass the results of one command
@@ -259,7 +275,8 @@ the original data to stay untouched.
         filter(weight < 5) %>%
         select(species_id,sex,weight)
 
-#### Mutate
+Mutate
+------
 
 Often we will want to create new columns based on values in existing
 columns. To do this we can use the `mutate()` function.
@@ -291,7 +308,8 @@ The `is.na()` function determines when something is an `NA`. The `!`
 negates the result, so we're asking for every row where weight is not an
 `NA`.
 
-#### Challenge
+Challenge
+---------
 
 Create new data frame from the `surveys` data that contains only the
 `species_id` column and a new column you make called `hindfoot_half`
@@ -312,7 +330,8 @@ split the data into groups, then perform a set of analysis steps, and
 then combine the results. `dplyr` makes this easy using the
 `summarize()` function.
 
-##### `summarize()` function
+`summarize()` function
+----------------------
 
 The `summarize()` function combines groups of data into a single-row
 summary of that group. It is often used following `group_by()` which
@@ -350,7 +369,8 @@ order using the following:
                 min_weight = min(weight)) %>%
       arrange(desc(mean_weight))
 
-##### Counting
+Counting
+--------
 
 When we work with data, we often want to know how many observations are
 in a particular group. We can do this with the `dplyr` function
@@ -374,7 +394,8 @@ arrange the output.
       count(sex, species_id) %>%
       arrange(species_id, desc(n))
 
-### Exporting data
+Exporting data
+==============
 
 In preparation for our next lesson on plotting, we are going to prepare
 a cleaned up version of the data set that doesn’t include any missing
@@ -404,7 +425,8 @@ To export this data, we can use the `read.csv()` function.
 
     write.csv(surveys_complete, file ="surveys_complete.csv") # use the file = to name the file and set the path to the file
 
-### Visualizing Data
+Visualizing Data
+================
 
 Now we will discuss how to visualize our dataset using a very popular
 package called `ggplot2`. In this section we will be creating boxplots,
@@ -471,7 +493,8 @@ rather than on the next line. For example:
     surveys_plot 
      + geom_point()
 
-##### Customizing plots
+Customizing plots
+-----------------
 
 We can add colors within the `geom_point` call.
 
@@ -495,7 +518,8 @@ Colors can also be set inside the initial `aes()` mapping:
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/color_diff2-1.png)
 
-##### Boxplots
+Boxplots
+--------
 
 We can also use a boxplot to explore the distribution of weight within
 species.
@@ -515,7 +539,8 @@ defined by the user. We can then set the color inside our `geom_jitter`.
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/boxplot_jitter-1.png)
 
-#### Time series data
+Time series data
+----------------
 
 Let’s calculate number of counts per year for each genus. First we need
 to group the data and count records within each group:
@@ -548,7 +573,8 @@ colors.
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/line_color-1.png)
 
-##### Faceting
+Faceting
+--------
 
 Faceting is a special technique in `ggplot2` that allows users to split
 one plot into several based on a factor of interest. There are two types
@@ -598,7 +624,8 @@ plots into rows and columns.
 
 -   Skipping code regarding old syntax
 
-#### Changing ggplot themes
+Changing ggplot themes
+----------------------
 
 `ggplot2` has several preloaded themes that can be used to change the
 appearance of plots. For example:
@@ -610,7 +637,8 @@ appearance of plots. For example:
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/ggplot_theme-1.png)
 
-#### Arranging and Exporting plots
+Arranging and Exporting plots
+-----------------------------
 
 Faceting is great for splitting one plot into multiple, but you can also
 combine multiple plots using the `gridExtra` package. This package
@@ -657,15 +685,132 @@ You can also save your plots with ggsave
 Note that the `width` and `height` parameters determine the font size
 saved in the plot.
 
-### Importing and working with messy data
+Importing and working with messy data
+=====================================
 
 Now we will learn about reshaping messy data, such as what you might
 encounter during labs.
+
+Reshaping with gather and spread
+--------------------------------
+
+When using spreadsheets with R, we try to follow these 4 rules for
+creating "tidy" data
+
+1.  Each variable has its own column
+2.  Each observation has its own row
+3.  Each value must have its own cell
+4.  Each type of observational unit forms a table
+
+This type of data set up is referred to as "long" format. "Wide"
+formatted data is when each observation does not have its own unique
+row. Both types of data formatting can be useful in certain situations.
+For plotting however, we keep our data in long format. We can transform
+between the two using the codes `spread()` and `gather()`. Spreading
+data transforms wide data into long data, while gathering data condenses
+long data into wide data.
+
+Spreading
+---------
+
+For example, if we were given a table where there was one genus column
+that we wanted to split into a table where each genus had its own column
+we would want to spread the data.
+
+`spread()` takes three arguments: 1. The data 2. The key column variable
+whose values will become new column names. 3. The value column variable
+whose values will fill the new column variables.
+
+Gathering
+---------
+
+For example, if we were given the opposite situation with a table where
+there were multiple columns, one for each genus, and we wanted to
+condense them into into one column, we would use the `gather()`
+function. This function takes the following 4 arguments.
+
+1.  The data
+2.  The *key* column variable we wish to create from the column names
+3.  The *values* column variable we wish to create and fill with values
+    associated with they key.
+4.  The names of the columns we use to fill the key variable
+
+Our messy data
+--------------
+
+Now we can pull up our messy data table in Excel and take a look.
+
+Some common problems we have when working on collaborative, long term
+projects is that common conventions for how to record variables can get
+lost.
+
+Common issues: 1. Dates in non-uniform formatting (DD/MM/YY vs.
+MM/DD/YYYY) 2. Capitalization and abbreviations ("male" vs "M") 3.
+Different systems for recoring a lack of data (NA vs. missing vs. 0)
+
+Though we can perform data cleaning in R, for a short data set we can
+hand clean our data in excel. Please go through the data and fix all
+issues you spot.
+
+With our data fixed we load in our data set.
+
+    messy_surveys_fixed <- read.csv("surveys_messier_fixed.csv", header=TRUE)
+    head(messy_surveys_fixed)
+
+    ##   X record_id month day year plot_id species_id sex weight   genus
+    ## 1 1         1     7  16 1977       2         NL   M     NA Neotoma
+    ## 2 2        72     8  19 1977       2         NL   M     NA Neotoma
+    ## 3 3       224     9  13 1977       2         NL         NA Neotoma
+    ## 4 4       266    10  16 1977       2         NL         NA Neotoma
+    ## 5 5       349    11  12 1977       2         NL         NA Neotoma
+    ## 6 6       363    11  12 1977       2         NL         NA Neotoma
+    ##    species   taxa Control Long.term.Krat.Exclosure Rodent.Exclosure
+    ## 1 albigula Rodent      32                       NA               NA
+    ## 2 albigula Rodent      31                       NA               NA
+    ## 3 albigula Rodent      NA                       NA               NA
+    ## 4 albigula Rodent      NA                        1               NA
+    ## 5 albigula Rodent      NA                       NA               NA
+    ## 6 albigula Rodent      NA                       NA                3
+    ##   Short.term.Krat.Exclosure Spectab.exclosure
+    ## 1                        NA                NA
+    ## 2                        NA                NA
+    ## 3                        NA                NA
+    ## 4                        NA                NA
+    ## 5                        NA                NA
+    ## 6                        NA                NA
+
+Now we see that currently there are multiple columns for each plot type.
+If we want to combine the plot types into a single column, we will need
+to use the `gather()` function.
+
+    messy_gathered <- messy_surveys_fixed %>% gather(key = plot_type, value = hindfoot_length, -c(plot_id, record_id, month, day, year, species_id, sex, weight, genus, species, taxa, X))
+
+    # the key is the variable whose values are column names
+    # the value is a variable whose values are currently spread (in our case the hind_foot_length data has been spread)
+    # the final argument contains the columns to ignore while gathering
 
 #### Code used to create messy data
 
 surveys\_messy &lt;- spread(surveys, plot\_type, hindfoot\_length)
 surveys\_messy &lt;- head(surveys\_messy, n=30)
-write.csv(file="surveys\_messy.csv", surveys\_messy) \# In excel I
-sprinkled in a few challenges that could occur when you have \# multiple
-people recording data
+write.csv(file="surveys\_messy.csv", surveys\_messy)
+
+In excel I sprinkled in a few challenges that could occur when you have
+when multiple people are recording data
+
+Wrap-up
+=======
+
+To recap today we have gone over the following data analysis skills: 1.
+R Basics 2. Basic data manipulation using `dplyr` and `tidyr` 3.
+Visualizing data with `ggplot2`, exporting and arranging data 4.
+Importing and working with messy data
+
+For the sake of time, this lesson was created from the data carpentry R
+Ecology lesson. Please visit this website for more detailed information.
+<https://datacarpentry.org/R-ecology-lesson/03-dplyr.html#reshaping_with_gather_and_spread>
+
+As you go, we really care about your feedback so if everyone could write
+down one thing you thought went really well on their green sticky note,
+and write down one thing that could be improved on their red sticky
+note, and turn these in as you leave.
