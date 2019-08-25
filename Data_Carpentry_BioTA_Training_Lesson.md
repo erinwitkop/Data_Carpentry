@@ -146,14 +146,14 @@ installed and then loaded. To load a package you will load it as a
     # Libraries need to be loaded every time you re-open your R session
     library(tidyverse)
 
-    ## ── Attaching packages ──────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+    ## ── Attaching packages ──────────────────────────────────────────────────── tidyverse 1.2.1 ──
 
     ## ✔ ggplot2 3.2.1     ✔ purrr   0.3.2
     ## ✔ tibble  2.1.3     ✔ dplyr   0.8.3
     ## ✔ tidyr   0.8.3     ✔ stringr 1.4.0
     ## ✔ readr   1.3.1     ✔ forcats 0.4.0
 
-    ## ── Conflicts ─────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ─────────────────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
 
@@ -550,9 +550,112 @@ colors.
 
 ##### Faceting
 
+Faceting is a special technique in `ggplot2` that allows users to split
+one plot into several based on a factor of interest. There are two types
+of faceting:
+
+-   `facet_wrap()` arranges a one-dimensional sequence of panels to
+    allow them to cleanly fit on one page.
+-   `facet_grid()` allows you to form a matrix of rows and columns of
+    panels.
+
+For both, you specify the variables to facet by using the `vars()`
+function. For example `facet_wrap(facets=vars(facet_variable))` or
+`facet_grid(rows = vars(row_variable), cols = vars(col_variable))`.
+
+We can make a time series plot for each species by using the following
+facet.
+
+    ggplot(data= yearly_counts, mapping = aes(x= year, y = n)) +
+      geom_line() + 
+      facet_wrap(facets = vars(genus))
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/facet-1.png)
+
+Now we want to split each plot by the sex of the animals. To do this we
+make a counts plot grouped by `year`, `species_id`, and `sex`.
+
+    yearly_sex_counts <- surveys_complete %>% 
+      count(year, genus, sex) %>%
+      filter(sex != "") # remove empty rows, this may not be necessary
+
+Now we can plot a separate line for each sex using the `color` argument.
+
+    ggplot(data= yearly_sex_counts, mapping = aes(x= year, y = n, color = sex)) +
+      geom_line() + 
+      facet_wrap(facets = vars(genus))
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/facet_color-1.png)
+
+Now we can use `facet_grid` to split the plots by sex and organize the
+plots into rows and columns.
+
+    ggplot(data = yearly_sex_counts, mapping = aes(x = year, y = n, color = sex)) +
+      geom_line() +
+      facet_grid(rows= vars(sex), cols= vars(genus))
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/facet_grid-1.png)
+
+-   Skipping code regarding old syntax
+
 #### Changing ggplot themes
 
+`ggplot2` has several preloaded themes that can be used to change the
+appearance of plots. For example:
+
+    ggplot(data = yearly_sex_counts, mapping = aes(x = year, y = n, color= sex)) +
+      geom_line() +
+      facet_wrap(vars(genus)) + 
+      theme_bw()
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/ggplot_theme-1.png)
+
 #### Arranging and Exporting plots
+
+Faceting is great for splitting one plot into multiple, but you can also
+combine multiple plots using the `gridExtra` package. This package
+allows you to combine multiple plots into a single figure using
+`grid.arrange()`.
+
+    # install.packages("gridExtra")
+
+    library(gridExtra)
+
+    ## 
+    ## Attaching package: 'gridExtra'
+
+    ## The following object is masked from 'package:dplyr':
+    ## 
+    ##     combine
+
+    spp_weight_boxplot <- ggplot(data = surveys_complete, 
+                                 mapping = aes(x = genus, y = weight)) +
+      geom_boxplot() +
+      xlab("Genus") + ylab("Weight (g)") +
+      scale_y_log10() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+    spp_count_plot <- ggplot(data = yearly_counts, 
+                             mapping = aes(x = year, y = n, color = genus)) +
+      geom_line() + 
+      xlab("Year") + ylab("Abundance")
+
+    grid.arrange(spp_weight_boxplot, spp_count_plot, ncol = 2, widths = c(4, 6)) # set the ncol and width 
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/install_grid-1.png)
+
+You can also save your plots with ggsave
+
+    combo_plot <- grid.arrange(spp_weight_boxplot, spp_count_plot, ncol = 2, widths = c(4, 6))
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/export_plot-1.png)
+
+    ggsave("combo_plot_abun_weight.png", combo_plot, width = 10, dpi = 300)
+
+    ## Saving 10 x 5 in image
+
+Note that the `width` and `height` parameters determine the font size
+saved in the plot.
 
 ### Importing and working with messy data
 
