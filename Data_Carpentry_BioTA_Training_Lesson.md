@@ -255,14 +255,14 @@ installed and then loaded. To load a package you will load it as a
     # Libraries need to be loaded every time you re-open your R session
     library(tidyverse)
 
-    ## ── Attaching packages ────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+    ## ── Attaching packages ────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
 
     ## ✔ ggplot2 3.2.1     ✔ purrr   0.3.2
     ## ✔ tibble  2.1.3     ✔ dplyr   0.8.3
     ## ✔ tidyr   0.8.3     ✔ stringr 1.4.0
     ## ✔ readr   1.3.1     ✔ forcats 0.4.0
 
-    ## ── Conflicts ───────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ───────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
 
@@ -730,6 +730,16 @@ labels and titles, which we can do rather easily in `ggplot2`.
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/title-3.png)
 
+    #Change font size 
+    surveys_complete_color + ggtitle("Relationship between Hindfoot length and body weight by species") + 
+      ylab("Hindfoot Length (cm)") + 
+      xlab("Weight (g)") + 
+      guides(color=guide_legend(title = "Species ID")) +
+      theme(axis.title = element_text(size=12,face="bold"),
+            plot.title = element_text(size=14, face="bold")) 
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/title-4.png)
+
 ### Plot Challenge 3
 
 Go back to the plot we made for our first challenge and add appropriate
@@ -783,6 +793,14 @@ Make a boxplot using the hindfoot\_lenght rather than the weight
         geom_jitter(alpha = 0.3, color = "tomato")
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/boxplot_hindfoot-1.png)
+
+Bar chart example
+-----------------
+
+    ggplot(data = surveys_complete, mapping = aes(x = species_id, y = hindfoot_length)) +
+        geom_col()
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/barplot_hindfoot-1.png)
 
 Time series data
 ----------------
@@ -1160,6 +1178,12 @@ Link together filtering, toy example
 
 Google sheets data loading and fixing
 =====================================
+
+Advanced ggplot code for calculating and adding error bars to a graph after you calculate the error
+===================================================================================================
+
+Calculating a line and adding the line to a geom plot
+=====================================================
 
 Wrap-up
 =======
