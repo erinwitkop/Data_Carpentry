@@ -56,6 +56,7 @@ encourage the following kinds of behaviors in all platforms and events:
     comments, ideas
 
 -   HTML for the Etherpad:
+    <https://pad.carpentries.org/RTraining_URI_08292019>
 
 1.  Intro to the sticky notes you will receive.
 
@@ -149,28 +150,18 @@ developers, like stackoverflow.com
 We can download the file directly from the internet using the following
 function.
 
-    download.file(url="https://ndownloader.figshare.com/files/2292169",
+    download.file(url="https://ndownloader.figshare.com/files/2292169", # need to make sure you're on the URI secure!
                   destfile = "portal_data_joined.csv")
 
 The data can now be loaded using the `read.csv` function.
 
     # Use the read.csv function to load in data with comma separated values
     # Use this as an example to introduce how to save things as a variable 
+
+    # Use this as an opportunity to explain why we comment out code for each new command we do 
     read.csv("portal_data_joined.csv", header =TRUE) # setting header=TRUE will conserve your column names from your CSV
 
     surveys <- read.csv("portal_data_joined.csv", header =TRUE) # setting header=TRUE will conserve your column names from your CSV
-
-To view what the beginning of the file look like, we can use the
-function `head()`
-
-    head(surveys)
-
-To view the entire dataset in a tab, use the command `View`.
-
-    View(surveys)
-
-PAUSE: explore the data and talk about the missing values and ways we
-might want to manipulate the data
 
 Our surveys object is a class of data structure called a data frame. A
 data frame is the typical data structure used in data manipulation for
@@ -183,6 +174,47 @@ columns are vectors, each column must contain a single type of data
 (e.g., characters, integers, factors). For example, here is a figure
 depicting a data frame comprising a numeric, a character, and a logical
 vector.
+
+To view what the beginning of the file look like, we can use the
+function `head()`
+
+    # take the head of surveys 
+    head(surveys)
+
+Take some time now to view the dataset. To work with the data we need to
+know what it looks like and think about how this was taken:
+
+First observations: - We have several columns, record\_id, month, day,
+year , species\_id, sex, hindfoot\_lenght, eight, genus, species, taxa,
+plot\_type - What is our main numerical data points? Hindfoot length,
+weight, - We can deduce that in this experiment, data for species
+hindfoot length was recorded daily for both males and females across
+several different plot types - To visualize this I'll draw a picture: -
+We have several different plot types, each with different plot IDs :
+"Control" "Long-term Krat Exclosure" "Rodent Exclosure" "Short-term Krat
+Exclosure" "Spectab exclosure" - Every day we go to the plot and we
+sample rodents in the plot, and we record their hindfoot length, their
+sex, and their weight -We observe in the data their are often NA's, and
+there are several blankcs. This can be used in several situations, so
+its important that when data is initally collected, particularly when
+collected collaboratively, that you decide what NA versus a blank mean -
+NA for weight could mean it was too large to weigh and the scale
+wouldn't work, NA could mean you forgot to bring the scale,
+hindfoot\_length NA could mean they ran away...whereas a blank could
+mean someone just forgot to enter the data - Notice that we have month,
+day, and year separated. This is very smart for loading data into R.
+There are several different ways that people load dates, but splitting
+it up now allows you to be better able to subset data later. - We also
+observe that most columns have only numerical or only character data ,
+while others have a mixture. -Taking note of what your data looks like
+is critical.
+
+To view the entire dataset in a tab, use the command `View`.
+
+    View(surveys)
+
+PAUSE: explore the data and talk about the missing values and ways we
+might want to manipulate the data
 
 To inspect the structure of our data we can use the `str()` function, or
 the `class()` function.
@@ -523,47 +555,64 @@ how to use it in `ggplot2`, and also manipulate the aesthetics of plots.
 The `ggplot2` package is included in the `tidyverse` package which we
 already loaded, so we don't need to load it again.
 
-`ggplot2` likes for data to be "long" format (rather than "wide"
-format), which means there is a column for every dimension and a row for
-each observation. In the next section of the lesson we will discuss how
-to change wide data to long format for use in plotting.
+How does ggplot2 work?
 
-Plots in ggplot are built in a step-by-step process, where you add
-graphics in different layers to customize the plot. This allows for
-increased flexibility.
+-   Plots in ggplot are built in a step-by-step process. You start with
+    giving it the data, then you add levels of graphics on top of it.
+    From there you keep adding layers to customize the plot. This allows
+    for increased flexibility.
 
 To build a basic ggplot plot, the following format is used
 `ggplot(data = <DATA>, mapping = aes(<MAPPINGS>)) +  <GEOM_FUNCTION>()`
 
+TASK: Make a plot of the relationship between animal weight and
+hindfoot\_length.
+
 Lets start with calling the data. We will be using our subset
 `surveys_complete` dataset we created above.
 
-    ggplot(data=surveys_complete)
+Lets read in this new data to make sure we're all in the same plot
+
+    ggplot(data=surveys_complete) # use this as an example of tab complete 
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/plot1-1.png)
 
 This command will generate the basic grid where your mapping will appear
 when you set the mapping aesthetics.
 
+Now, we will add in our aesthetics using the `aes()` function for
+aesthetics
+
     ggplot(data=surveys_complete, mapping = aes(x= weight, y=hindfoot_length)) 
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/aes-1.png)
 
     # the aes() function defines the variables that will be used for plotting and how to present them, you can set color, x/y position, and size of plots in the aes() function. 
+    # notice in the plot that the axes are named the same way that the variables you used for plotting are
+
+See that still, we have no actual points added, but we have an x and y
+axis that have labels and tick marks.
 
 Next we are ready to plot our actual data by adding a "geom", which are
 graphical representations of the data. There are a variety of geoms that
 can be used.
 `*`geom\_point()`for scatter plots, dot plots, etc.   *`geom\_boxplot()`for, well, boxplots!   *`geom\_line()`for trend lines, time series, etc.`
 
+    # Add the geom by using a plus sign, and because we already set our mapping we don't need to include the mapping inside of geom_point
     ggplot(data=surveys_complete, mapping = aes(x= weight, y=hindfoot_length))  + geom_point()
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/geom-1.png)
 
-You can also save the basic aesthetics of a plot to a variable that you
-can call and then add different geoms or aspects to it using `+`.
+    # Observations: all the points are black, so you can't tell which groups you have in the dataset 
 
+Something we can do now is actually save our plot to a variable that you
+can call it and easily add on different geoms or aesthetics using the
+`+`.
+
+    # To demonstrate this, we can save the basic mapping of our plot to a new variable, called surveys_plot
     surveys_plot <- ggplot(data=surveys_complete, mapping = aes(x= weight, y=hindfoot_length))  
+
+    # Now we can add to that object, any additional mapping we want
     surveys_plot + geom_point()
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/save_geom-1.png)
@@ -572,44 +621,136 @@ Note that in a `ggplot` function when adding new layers using the `+`
 symbol, the plus symbol needs to be at the end of the preceding line,
 rather than on the next line. For example:
 
-    # This is correct
-    surveys_plot +
-      geom_point() 
-
     # This will cause an error and will not work
     surveys_plot 
      + geom_point()
 
+    # This is correct
+    surveys_plot +
+      geom_point() 
+
+    # Why? You need to tell ggplot that you want it to read down to the next line for mapping. The computer won't know unless you tell it to read to the next line
+
+### Plotting Challenge 1 (allow 5 minutes)
+
+Goal: Plot average hindfoot\_length in each plot\_type
+
+    # Perform two filters
+    challenge1 <- surveys_complete %>%
+      group_by(plot_type) %>%
+      summarize(mean_hindfoot = mean(hindfoot_length))
+
+    ggplot(challenge1, mapping = aes(x=plot_type, y = mean_hindfoot)) + geom_point()
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/plot_challenge1-1.png)
+
 Customizing plots
 -----------------
 
-We can add colors within the `geom_point` call.
+This is not a very attractive plot at the moment. To make it better we
+can a few customizations.
+
+First we'll add colors by specifying with the `geom_point` call.
 
     ggplot(data=surveys_complete, mapping = aes(x= weight, y=hindfoot_length)) +
-    geom_point(color = "blue")
+    geom_point(color = "blue") 
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/color-1.png)
 
-We can also color every species in the data differently by doing the
-following:
+    # This makes all the colors blue
+
+#### Notes on colors in ggplot
+
+Some notes about colors in ggplot. R has many base colors that it
+recognizes in plain english ("yellow","green", "red"). But you can also
+customize colors using hex codes, AKA HTML color codes. These are all
+six digit codes for very specific colors. For now we will stick with
+basic colors, but just know that there are options for really any
+colors. There are also pre-made color pallettes through packages like
+`RColorBrewer` that are premade and can help. There are also dedicated
+pallettes for colorblind friendly colors. These are particularly useful
+when presenting data to a large audience.
+
+We can also set colors for specific variables. For example, to color
+every species in the data differently we can do the following.
 
     ggplot(data=surveys_complete, mapping = aes(x= weight, y=hindfoot_length)) +
-    geom_point(aes(color = species_id))
+    geom_point(aes(color = species_id)) # we can add an extra aes inside the geom_point function 
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/color_diff-1.png)
 
-Colors can also be set inside the initial `aes()` mapping:
+Alternatively, colors can also be set inside the initial `aes()`
+mapping:
 
     ggplot(data=surveys_complete, mapping = aes(x= weight, y=hindfoot_length, color = species_id)) +
-    geom_point()
+    geom_point() 
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/color_diff2-1.png)
+
+Now we observe that every species has its own color
+===================================================
+
+### Plotting Challenge 2
+
+Now instead of wanting to plot every species, we want to plot by
+plot\_type.
+
+    ggplot(data=surveys_complete, mapping = aes(x= weight, y=hindfoot_length, color = plot_type)) +
+    geom_point() 
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/plot_type_challenge-1.png)
+
+These plots are getting better, but we are still not close to something
+you would want to put in a presentation or have a student turn in on a
+lab report. One way we can get it there is by customizing the axis
+labels and titles, which we can do rather easily in `ggplot2`.
+
+### Change axis labels and add a title
+
+    surveys_complete_color <- ggplot(data=surveys_complete, mapping = aes(x= weight, y=hindfoot_length, color = species_id)) +
+    geom_point()
+
+    # To get a title we add the function `ggtitle()`
+    surveys_complete_color + ggtitle("Relationship between Hindfoot length and body weight by species") 
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/title-1.png)
+
+    # To change our axes title we can add on the `ylab()` and `xlab()` functions. 
+    surveys_complete_color + ggtitle("Relationship between Hindfoot length and body weight by species") + 
+      ylab("Hindfoot Length (cm)") + 
+      xlab("Weight (g)")
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/title-2.png)
+
+    # To change our legend title we can add a new argument with the `guides()` function
+    surveys_complete_color + ggtitle("Relationship between Hindfoot length and body weight by species") + 
+      ylab("Hindfoot Length (cm)") + 
+      xlab("Weight (g)") + 
+      guides(color=guide_legend(title = "Species ID"))
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/title-3.png)
+
+### Plot Challenge 3
+
+Go back to the plot we made for our first challenge and add appropriate
+axes titles and a plot title
+
+    ggplot(challenge1, mapping = aes(x=plot_type, y = mean_hindfoot)) + geom_point() + xlab("Plot Type") +
+      ylab("Hindfoot Length (cm)") + ggtitle("Mean Hindfoot length in each plot type") +  guides(color=guide_legend(title = "Plot Type"))
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/add_title-1.png)
+
+Next we can move on to plotting with boxplots. These are useful because
+they plot the median, max and min and the first and third quartiles of
+your data,
 
 Boxplots
 --------
 
 We can also use a boxplot to explore the distribution of weight within
 species.
+
+This time we'll be mapping with weight rather than `hindfoot_lenght`
 
     ggplot(data=surveys_complete, mapping = aes(x= species_id, y=weight)) +
     geom_boxplot()
@@ -621,44 +762,134 @@ We can add points to our boxplot by using `geom_jitter` and setting the
 defined by the user. We can then set the color inside our `geom_jitter`.
 
     ggplot(data = surveys_complete, mapping = aes(x = species_id, y = weight)) +
+        geom_boxplot() +
+        geom_jitter() # geom_jitter is a geom that makes the points not overlap as much, but it's still pretty hard to see
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/boxplot_jitter-1.png)
+
+    # to help make the plots easier to see, we will add another parameter into the geom_jitter which is the `alpha`. The alpha can make the points have a certain level of transparency. We can also add a color to the points inside our geom jitter
+    ggplot(data = surveys_complete, mapping = aes(x = species_id, y = weight)) +
         geom_boxplot(alpha = 0) +
         geom_jitter(alpha = 0.3, color = "tomato")
 
-![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/boxplot_jitter-1.png)
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/boxplot_jitter-2.png)
+
+### Plotting Challenge 4
+
+Make a boxplot using the hindfoot\_lenght rather than the weight
+
+    ggplot(data = surveys_complete, mapping = aes(x = species_id, y = hindfoot_length)) +
+        geom_boxplot(alpha = 0) +
+        geom_jitter(alpha = 0.3, color = "tomato")
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/boxplot_hindfoot-1.png)
 
 Time series data
 ----------------
 
-Let’s calculate number of counts per year for each genus. First we need
-to group the data and count records within each group:
+With time series data our goal will now be to
+
+Let’s calculate number of counts per year for each genus and plot type.
+First we need to group the data and count records within each group:
 
     yearly_counts <- surveys_complete %>%
       count(year, genus)
 
-Time series data can be visualized as a line plot with years on the x
-axis and counts on the y axis:
+We can try first to plot with years on the x axis and counts on the y
+axis, with the goal of creating a line for genus.
 
-    ggplot(data = yearly_counts, mapping = aes(x = year, y = n)) +
+    ggplot(data = yearly_counts, mapping = aes(x = year, y = n)) + # our count column is called "n" now
          geom_line()
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/time_series_plot-1.png)
 
-Unfortunately, this does not work because we plotted data for all the
-genera together. We need to tell ggplot to draw a line for each genus by
-modifying the aesthetic function to include `group = genus`.
+Why does this not work? We haven't told R to group the data for genera
+together, so it's plotting not with respect to the genera distinction.
+
+1.  We need to tell ggplot to draw a line for each genus by using a new
+    argument in the mapping aesthetic function called `group`. The
+    `group` argument adds a grouping similar to the dplyr `group_by`
+    function. In this case we will now include `group = genus`.
+
+<!-- -->
 
     ggplot(data = yearly_counts, mapping = aes(x = year, y = n, group = genus)) +
         geom_line()
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/group_genus-1.png)
 
-We can distinguish the different genera in the plot by specifying the
-colors.
+To make this more interesting now, we can distinguish the different
+genera in the plot by specifying the colors.
 
-    ggplot(data = yearly_counts, mapping = aes(x = year, y = n, color = genus)) +
+    ggplot(data = yearly_counts, mapping = aes(x = year, y = n, color = genus, group = genus)) +
         geom_line()
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/line_color-1.png)
+
+#### Plotting Challenge 4
+
+Instead of grouping monthly counts by genus rather than yearly counts,
+we are interested in and coloring by sex.
+
+    monthly_counts <- surveys_complete %>%
+      count(month, genus)
+    ggplot(data = monthly_counts, mapping = aes(x = month, y = n, color = genus, group = genus)) +
+        geom_line()
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/plot_challenge_4-1.png)
+
+    # Why don't the axes make sense? Because months are discrete factors, not continuous. To fix this we can add the following `as.factor()` function before the variable month
+    ggplot(data = monthly_counts, mapping = aes(x = as.factor(month), y = n, color = genus, group = genus)) +
+        geom_line()
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/plot_challenge_4-2.png)
+
+Changing axes tick marks
+------------------------
+
+As is in this challenge example, sometimes your data in the table is not
+in the "pretty" format you would like it to be on a finished plot. The
+functions `scale_x_discrete()` and `scale_y_discrete()` are used to
+customize discrete x and y axis, respectively. The functions
+`scale_x_continuous()` and `scale_y_continuous()` are used with
+continuous data.
+
+Today we will focus on changing the discrete x axis for months. Setting
+continuous scales works very similarly however.
+
+It is possible to use these functions to change the following x or y
+axis parameters :
+
+-   axis titles
+-   axis limits (data range to display)
+-   choose where tick marks appear
+-   manually label tick marks
+
+The simplified version of these is
+
+`scale_x_discrete(name, breaks, labels, limits)`
+`scale_y_discrete(name, breaks, labels, limits)`
+
+What do each of the arguments do? - name : x or y axis labels - breaks :
+control the breaks in the guide (axis ticks, grid lines, …). Among the
+possible values, there are : - NULL : hide all breaks - waiver() : the
+default break computation - a character or numeric vector specifying
+which breaks to display - labels : labels of axis tick marks. Allowed
+values are : - NULL for no labels - waiver() for the default labels -
+character vector to be used for break labels - limits : a character
+vector indicating the data range. *Limits* is also used to change the
+order of items.
+
+Now we would like to change the month labels on our discrete axis to be
+something more readable.
+
+    ggplot(data = monthly_counts, mapping = aes(x = as.factor(month), y = n, color = genus, group = genus)) +
+        geom_line() + 
+        scale_x_discrete(labels=c("1"="Jan","2"="Feb.", "3"="Mar", "4"="April","5"="May",
+                                  "6"="June","7"="July","8"="Aug", "9"="Sept","10"="Oct","11"="Nov",
+                                  "12"="Dec")) # explain c for concatenate 
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/change_month-1.png)
 
 Faceting
 --------
@@ -709,16 +940,14 @@ plots into rows and columns.
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/facet_grid-1.png)
 
--   Skipping code regarding old syntax
-
-Customizing axis and titles
----------------------------
-
 END OF DAY 1
 ============
 
-Erin R
-======
+Fill out stickies with things that went well, things that you would like
+to see more of.
+
+DAY 2: Begin with Erin
+======================
 
 Importing and working with messy data
 =====================================
@@ -726,24 +955,32 @@ Importing and working with messy data
 Now we will learn about reshaping messy data, such as what you might
 encounter during labs.
 
+Often people will make data tables that are not formatted best for use
+in R. So one of our first steps is reformatting the data in a "tidy" way
+that is suitable for loading into R.
+
+Two of the critical functions for doing this are `gather()` and
+`spread()`.
+
 Reshaping with gather and spread
 --------------------------------
 
 When using spreadsheets with R, we try to follow these 4 rules for
-creating "tidy" data
+creating "tidy" data.
 
 1.  Each variable has its own column
 2.  Each observation has its own row
 3.  Each value must have its own cell
 4.  Each type of observational unit forms a table
 
-This type of data set up is referred to as "long" format. "Wide"
-formatted data is when each observation does not have its own unique
-row. Both types of data formatting can be useful in certain situations.
-For plotting however, we keep our data in long format. We can transform
-between the two using the codes `spread()` and `gather()`. Spreading
-data transforms wide data into long data, while gathering data condenses
-long data into wide data.
+Animation about gather and spread. In long format you have one row for
+every observation, while in wide format the observations are condensed.
+
+<https://github.com/gadenbuie/tidyexplain>
+
+The `gather()` function takes wide data and gathers it into long format,
+while `spread()` takes long data and spreads it into long, where several
+variables are split up.
 
 Spreading
 ---------
@@ -823,6 +1060,18 @@ to use the `gather()` function.
     # the key is the variable whose values are column names
     # the value is a variable whose values are currently spread (in our case the hind_foot_length data has been spread)
     # the final argument contains the columns to ignore while gathering
+
+#### Steps to fix the new messy data
+
+### Recode step
+
+#### Using unique
+
+unique(messy\_data$sex)
+
+### Separate step for species
+
+### Spread measurement back out with the value column
 
 #### Code used to create messy data
 
