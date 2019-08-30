@@ -48,3 +48,12 @@ View(species_counts)
 messy_complete <- messy_data_separated_spread %>%
   drop_na() %>%
   filter(species_id %in% species_counts$species_id)
+
+# Plotting data as a timeseries
+# Plot number of counts for a genus in every year in our data
+
+yearly_counts <- messy_complete %>%
+  count(year, Genus)
+View(yearly_counts)
+
+# Scatterplot of genus counts for each year 
