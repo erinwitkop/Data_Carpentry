@@ -255,14 +255,14 @@ installed and then loaded. To load a package you will load it as a
     # Libraries need to be loaded every time you re-open your R session
     library(tidyverse)
 
-    ## ── Attaching packages ────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+    ## ── Attaching packages ──────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
 
     ## ✔ ggplot2 3.2.1     ✔ purrr   0.3.2
     ## ✔ tibble  2.1.3     ✔ dplyr   0.8.3
     ## ✔ tidyr   0.8.3     ✔ stringr 1.4.0
     ## ✔ readr   1.3.1     ✔ forcats 0.4.0
 
-    ## ── Conflicts ───────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ─────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
 
@@ -802,19 +802,288 @@ Bar chart example
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/barplot_hindfoot-1.png)
 
+END OF DAY 1
+============
+
+Fill out stickies with things that went well, things that you would like
+to see more of.
+
+DAY 2: Begin with Erin
+======================
+
+Today's plan:
+-------------
+
+-   Import and fix some very messy data and learn some new commands to
+    do so.
+-   Plot timeseries data, and change how data is arranged.
+-   Do some basic statistics work
+-   Work with fixing a very messy data sheet on your own
+
+Importing and working with messy data
+-------------------------------------
+
+Load the data
+-------------
+
+We will start by loading in the data. Do we remember how to do that so
+that it will format correctly in dplyr?
+
+    download.file(url="https://github.com/erinroberts/Data_Carpentry/blob/master/messy_data.csv",destfile = "messy_data.csv")
+    messy_data <- read_csv("./R_workshop_2019/messy_data.csv")
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   record_id = col_double(),
+    ##   month = col_double(),
+    ##   day = col_double(),
+    ##   year = col_double(),
+    ##   plot_id = col_double(),
+    ##   species_id = col_character(),
+    ##   sex = col_character(),
+    ##   species = col_character(),
+    ##   taxa = col_character(),
+    ##   plot_type = col_character(),
+    ##   measurement = col_character(),
+    ##   value = col_double()
+    ## )
+
+Inspect the data
+----------------
+
+Now lets see what this dataframe looks like.
+
+    head(messy_data)
+
+    ## # A tibble: 6 x 12
+    ##   record_id month   day  year plot_id species_id sex   species taxa 
+    ##       <dbl> <dbl> <dbl> <dbl>   <dbl> <chr>      <chr> <chr>   <chr>
+    ## 1         1     7    16  1977       2 NL         m     Neotom… Rode…
+    ## 2         1     7    16  1977       2 NL         M     Neotom… Rode…
+    ## 3         2     7    16  1977       3 NL         M     Neotom… Rode…
+    ## 4         2     7    16  1977       3 NL         m     Neotom… Rode…
+    ## 5         3     7    16  1977       2 DM         f     Dipodo… Rode…
+    ## 6         3     7    16  1977       2 DM         F     Dipodo… Rode…
+    ## # … with 3 more variables: plot_type <chr>, measurement <chr>, value <dbl>
+
+    summary(messy_data)
+
+    ##    record_id         month             day            year     
+    ##  Min.   :    1   Min.   : 1.000   Min.   : 1.0   Min.   :1977  
+    ##  1st Qu.: 8942   1st Qu.: 4.000   1st Qu.: 9.0   1st Qu.:1984  
+    ##  Median :17906   Median : 6.000   Median :16.0   Median :1990  
+    ##  Mean   :17889   Mean   : 6.483   Mean   :16.1   Mean   :1991  
+    ##  3rd Qu.:26812   3rd Qu.:10.000   3rd Qu.:23.0   3rd Qu.:1997  
+    ##  Max.   :35548   Max.   :12.000   Max.   :31.0   Max.   :2002  
+    ##                                                                
+    ##     plot_id       species_id            sex              species         
+    ##  Min.   : 1.00   Length:66076       Length:66076       Length:66076      
+    ##  1st Qu.: 5.00   Class :character   Class :character   Class :character  
+    ##  Median :11.00   Mode  :character   Mode  :character   Mode  :character  
+    ##  Mean   :11.26                                                           
+    ##  3rd Qu.:17.00                                                           
+    ##  Max.   :24.00                                                           
+    ##                                                                          
+    ##      taxa            plot_type         measurement            value       
+    ##  Length:66076       Length:66076       Length:66076       Min.   :  2.00  
+    ##  Class :character   Class :character   Class :character   1st Qu.: 21.00  
+    ##  Mode  :character   Mode  :character   Mode  :character   Median : 34.00  
+    ##                                                           Mean   : 36.03  
+    ##                                                           3rd Qu.: 41.00  
+    ##                                                           Max.   :280.00  
+    ##                                                           NA's   :2524
+
+What do we notice about it? - The entries in the sex column are mixed
+up, where male and female are not always lower or upper case - The genus
+column is gone and there is now one column that has genus and species in
+it. Say for example that we wanted to be able to use the filter command
+to filter out particular genus or species. We couldn't do it with the
+data in its current format. - The measurement column contains now
+measurements for weight and hindfoot\_length and the value column
+contains values for both. Because this is mixed, we can't easily plot
+it.
+
+### Fix our messy data sheet
+
+#### Steps to fix the new messy data
+
+#### Make sex ID uniform
+
+We can do this using a new command, called recode() Lets investigate how
+recode works using what we learned yesterday
+
+    ?recode()
+
+We can use recode to manually change our data in R. Lets change all
+lower case "m" to uppercase "M" and change all lowercase "f" to
+uppercase "F"
+
+    # Just to check, what are all the current options in the sex column, we can check this using the unique command
+    unique(messy_data$sex)
+
+    ## [1] "m"      "M"      "f"      "F"      "MALE"   "FEMALE"
+
+    # We can change an existing column by assigning an operation on that column to it
+    messy_data$sex <- recode(messy_data$sex, "f"="F", "m"="M", "MALE"="M","FEMALE"="F")
+    head(messy_data)
+
+    ## # A tibble: 6 x 12
+    ##   record_id month   day  year plot_id species_id sex   species taxa 
+    ##       <dbl> <dbl> <dbl> <dbl>   <dbl> <chr>      <chr> <chr>   <chr>
+    ## 1         1     7    16  1977       2 NL         M     Neotom… Rode…
+    ## 2         1     7    16  1977       2 NL         M     Neotom… Rode…
+    ## 3         2     7    16  1977       3 NL         M     Neotom… Rode…
+    ## 4         2     7    16  1977       3 NL         M     Neotom… Rode…
+    ## 5         3     7    16  1977       2 DM         F     Dipodo… Rode…
+    ## 6         3     7    16  1977       2 DM         F     Dipodo… Rode…
+    ## # … with 3 more variables: plot_type <chr>, measurement <chr>, value <dbl>
+
+    unique(messy_data$sex)
+
+    ## [1] "M" "F"
+
+### Separate genus and species into separate columns
+
+We can do this using a new command called separate. To use the separate
+command, we first type the name of the data, and then we type the names
+of the new variables we want it to create, and then we put in the
+separator
+
+    separate(messy_data, species, c("Genus", "Species"), sep = " ")
+
+    ## # A tibble: 66,076 x 13
+    ##    record_id month   day  year plot_id species_id sex   Genus Species taxa 
+    ##        <dbl> <dbl> <dbl> <dbl>   <dbl> <chr>      <chr> <chr> <chr>   <chr>
+    ##  1         1     7    16  1977       2 NL         M     Neot… albigu… Rode…
+    ##  2         1     7    16  1977       2 NL         M     Neot… albigu… Rode…
+    ##  3         2     7    16  1977       3 NL         M     Neot… albigu… Rode…
+    ##  4         2     7    16  1977       3 NL         M     Neot… albigu… Rode…
+    ##  5         3     7    16  1977       2 DM         F     Dipo… merria… Rode…
+    ##  6         3     7    16  1977       2 DM         F     Dipo… merria… Rode…
+    ##  7         4     7    16  1977       7 DM         M     Dipo… merria… Rode…
+    ##  8         4     7    16  1977       7 DM         M     Dipo… merria… Rode…
+    ##  9         5     7    16  1977       3 DM         M     Dipo… merria… Rode…
+    ## 10         5     7    16  1977       3 DM         M     Dipo… merria… Rode…
+    ## # … with 66,066 more rows, and 3 more variables: plot_type <chr>,
+    ## #   measurement <chr>, value <dbl>
+
+    # Save the output of the separate command as a new variable
+    messy_data_separate <- separate(messy_data, species, c("Genus", "Species"), sep = " ")
+    head(messy_data_separate)
+
+    ## # A tibble: 6 x 13
+    ##   record_id month   day  year plot_id species_id sex   Genus Species taxa 
+    ##       <dbl> <dbl> <dbl> <dbl>   <dbl> <chr>      <chr> <chr> <chr>   <chr>
+    ## 1         1     7    16  1977       2 NL         M     Neot… albigu… Rode…
+    ## 2         1     7    16  1977       2 NL         M     Neot… albigu… Rode…
+    ## 3         2     7    16  1977       3 NL         M     Neot… albigu… Rode…
+    ## 4         2     7    16  1977       3 NL         M     Neot… albigu… Rode…
+    ## 5         3     7    16  1977       2 DM         F     Dipo… merria… Rode…
+    ## 6         3     7    16  1977       2 DM         F     Dipo… merria… Rode…
+    ## # … with 3 more variables: plot_type <chr>, measurement <chr>, value <dbl>
+
+### Spread measurement column back out with the value column
+
+The way the measurement column is now is in a long format, but the two
+different types of data are mixed currently, which makes it very
+difficult to plot. To spread these out we can use the `spread()`
+function. To move it in between a long and wide format (long when the
+data is gathered, and wide when the data is spread). Here is an
+animation of how it works.
+
+<https://github.com/gadenbuie/tidyexplain>
+
+The `gather()` function takes wide data and gathers it into long format,
+while `spread()` takes long data and spreads it into long, where several
+variables are split up.
+
+### Spreading
+
+`spread()` takes three arguments: 1. The data 2. The key column variable
+whose values will become new column names. 3. The value column variable
+whose values will fill the new column variables.
+
+Gathering
+---------
+
+For example, if we were given the opposite situation with a table where
+there were multiple columns, one for each genus, and we wanted to
+condense them into into one column, we would use the `gather()`
+function. This function takes the following 4 arguments.
+
+1.  The data
+2.  The *key* column variable we wish to create from the column names
+3.  The *values* column variable we wish to create and fill with values
+    associated with they key.
+4.  The names of the columns we use to fill the key variable
+
+Now we can `spread()` the measurement column out into two columns.
+
+    messy_data_separate_spread <- spread(messy_data_separate, measurement, value)
+    head(messy_data_separate_spread)
+
+    ## # A tibble: 6 x 13
+    ##   record_id month   day  year plot_id species_id sex   Genus Species taxa 
+    ##       <dbl> <dbl> <dbl> <dbl>   <dbl> <chr>      <chr> <chr> <chr>   <chr>
+    ## 1         1     7    16  1977       2 NL         M     Neot… albigu… Rode…
+    ## 2         2     7    16  1977       3 NL         M     Neot… albigu… Rode…
+    ## 3         3     7    16  1977       2 DM         F     Dipo… merria… Rode…
+    ## 4         4     7    16  1977       7 DM         M     Dipo… merria… Rode…
+    ## 5         5     7    16  1977       3 DM         M     Dipo… merria… Rode…
+    ## 6         6     7    16  1977       1 PF         M     Pero… flavus  Rode…
+    ## # … with 3 more variables: plot_type <chr>, hindfoot_length <dbl>,
+    ## #   weight <dbl>
+
+    # We can see now that we have two columns both with the values hindfoot_lenth and weight
+
+### Create cleaned and reduced subset for plotting timeseries data in R
+
+We are going to remove NAs and remove observations for rare species so
+we can plot how species abundances change through time.
+
+    # Calculate species counts and remove those that have low numbers
+    species_counts <- messy_data_separate_spread %>% 
+      count(species_id) %>% # extract the most common species by first counting the number of each
+        filter(n >= 50) # filter out species that have fewer and 50 counts
+    head(species_counts)
+
+    ## # A tibble: 6 x 2
+    ##   species_id     n
+    ##   <chr>      <int>
+    ## 1 DM         10523
+    ## 2 DO          3015
+    ## 3 DS          2458
+    ## 4 NL          1177
+    ## 5 OL           987
+    ## 6 OT          2213
+
+    ## Only keep the most common species using our table we just made to look up which ones to keep
+    messy_complete <- messy_data_separate_spread %>%
+      drop_na() %>%
+      filter(species_id %in% species_counts$species_id)
+
+To check that everyone has the same data, check that `messy_complete`
+has 30463 rows and 10 columns by typing `dim(messy_complete)`.
+
+Plotting this data as a timeseries
+----------------------------------
+
 Time series data
 ----------------
 
-With time series data our goal will now be to
+Say that we could like to plot the number of counts for a genus in every
+year in our dataset.
 
-Let’s calculate number of counts per year for each genus and plot type.
-First we need to group the data and count records within each group:
+First we can use our skills from yesterday to count the number of animals in each genus each year
+=================================================================================================
 
-    yearly_counts <- surveys_complete %>%
-      count(year, genus)
+    yearly_counts <- messy_complete %>%
+      count(year, Genus)
 
-We can try first to plot with years on the x axis and counts on the y
-axis, with the goal of creating a line for genus.
+Now we would like to plot these genus counts for each year. To make our
+basic grid for our plot we can review what we learned yesterday,
+plotting with years on the x axis and counts on the y axis, with the
+goal of creating a line for each genus.
 
     ggplot(data = yearly_counts, mapping = aes(x = year, y = n)) + # our count column is called "n" now
          geom_line()
@@ -831,7 +1100,7 @@ together, so it's plotting not with respect to the genera distinction.
 
 <!-- -->
 
-    ggplot(data = yearly_counts, mapping = aes(x = year, y = n, group = genus)) +
+    ggplot(data = yearly_counts, mapping = aes(x = year, y = n, group = Genus)) +
         geom_line()
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/group_genus-1.png)
@@ -839,28 +1108,141 @@ together, so it's plotting not with respect to the genera distinction.
 To make this more interesting now, we can distinguish the different
 genera in the plot by specifying the colors.
 
-    ggplot(data = yearly_counts, mapping = aes(x = year, y = n, color = genus, group = genus)) +
+    # we will specify the color inside the mapping function 
+    ggplot(data = yearly_counts, mapping = aes(x = year, y = n, color = Genus, group = Genus)) +
         geom_line()
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/line_color-1.png)
 
 #### Plotting Challenge 4
 
-Instead of grouping monthly counts by genus rather than yearly counts,
-we are interested in and coloring by sex.
+Instead of plotting the yearly counts for each genus, I'd like you to
+calculate the monthly counts and then color by genus.
 
-    monthly_counts <- surveys_complete %>%
-      count(month, genus)
-    ggplot(data = monthly_counts, mapping = aes(x = month, y = n, color = genus, group = genus)) +
+    monthly_counts <- messy_complete %>%
+      count(month, Genus)
+    ggplot(data = monthly_counts, mapping = aes(x = month, y = n, color = Genus, group = Genus)) +
         geom_line()
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/plot_challenge_4-1.png)
 
-    # Why don't the axes make sense? Because months are discrete factors, not continuous. To fix this we can add the following `as.factor()` function before the variable month
-    ggplot(data = monthly_counts, mapping = aes(x = as.factor(month), y = n, color = genus, group = genus)) +
+Why don't the axes make sense? We want it to actually read the month data as a "factor" rather than as number. To fix this we can add the following `as.factor()` function before the variable month
+====================================================================================================================================================================================================
+
+    ggplot(data = monthly_counts, mapping = aes(x = as.factor(month), y = n, color = Genus, group = Genus)) +
         geom_line()
 
-![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/plot_challenge_4-2.png)
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/factor-1.png)
+
+Faceting
+--------
+
+Faceting is a special technique in `ggplot2` that allows users to split
+one plot into several based on a factor of interest. There are two types
+of faceting:
+
+-   `facet_wrap()` arranges a one-dimensional sequence of panels to
+    allow them to cleanly fit on one page.
+-   `facet_grid()` allows you to form a matrix of rows and columns of
+    panels.
+
+For both, you specify the variables to facet by using the `vars()`
+function. For example `facet_wrap(facets=vars(facet_variable))` or
+`facet_grid(rows = vars(row_variable), cols = vars(col_variable))`.
+
+We can make a time series plot for each species by using the following
+facet.
+
+    ggplot(data= yearly_counts, mapping = aes(x= year, y = n)) +
+      geom_line() + 
+      facet_wrap(facets = vars(Genus))
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/facet-1.png)
+
+Now we want to split each plot by the sex of the animals. To do this we
+make a counts plot grouped by `year`, `species_id`, and `sex`.
+
+    yearly_sex_counts <- messy_complete %>% 
+      count(year, Genus, sex) 
+
+Now we can plot a separate line for each sex using the `color` argument.
+
+    ggplot(data= yearly_sex_counts, mapping = aes(x= year, y = n, color = sex)) +
+      geom_line() + 
+      facet_wrap(facets = vars(Genus))
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/facet_color-1.png)
+
+Now we can use `facet_grid` to split the plots by sex and organize the
+plots into rows and columns.
+
+    ggplot(data = yearly_sex_counts, mapping = aes(x = year, y = n, color = sex)) +
+      geom_line() +
+      facet_grid(rows= vars(sex), cols= vars(Genus))
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/facet_grid-1.png)
+
+#### Plot challenge
+
+Change the plot above so that the sex is plotted as the columns and
+genus as the rows.
+
+    ggplot(data = yearly_sex_counts, mapping = aes(x = year, y = n, color = sex)) +
+      geom_line() +
+      facet_grid(rows= vars(Genus), cols= vars(sex))
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/facet_challenge-1.png)
+\#\# Changing ggplot themes
+
+`ggplot2` has several preloaded themes that can be used to change the
+appearance of plots. For example:
+
+    ggplot(data = yearly_sex_counts, mapping = aes(x = year, y = n, color= sex)) +
+      geom_line() +
+      facet_wrap(vars(Genus)) + 
+      theme_bw()
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/ggplot_theme-1.png)
+
+    # Lets add titles to this graph and save it a variable
+
+    finished_plot <- ggplot(data = yearly_sex_counts, mapping = aes(x = year, y = n, color= sex)) +
+      geom_line() +
+      facet_wrap(vars(Genus)) + 
+      theme_bw() + ggtitle("Yearly Counts of Animals in each Genus and Sex") + 
+      xlab("Year") + ylab("Counts") + 
+      guides(color=guide_legend(title = "Sex"))
+
+### Exporting plots
+
+    # this will export in your current working project folder
+    ggsave("yearly_counts_genus_sex.png", finished_plot, width = 10, dpi = 300)
+
+    ## Saving 10 x 5 in image
+
+Advanced ggplot code for calculating and adding error bars to a graph after you calculate the error
+===================================================================================================
+
+plot the average yearly counts for each sex as a barchart and add error
+bars
+
+    ggplot(data = yearly_sex_counts, mapping = aes(x = year, y = n, color = sex)) +
+      geom_line() +
+      facet_grid(rows= vars(Genus), cols= vars(sex))
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/sd-1.png)
+
+    average_counts_year <- yearly_sex_counts %>%
+      group_by(year,sex) %>% summarize(mean=mean(n), sd =sd(n))
+
+    ggplot(average_counts_year , aes(x=year, y=mean)) +
+      geom_col(position="dodge") + 
+      geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd)) + 
+      facet_grid(rows=vars(sex))
+
+![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/sd-2.png)
+
+#### Stop here
 
 Changing axes tick marks
 ------------------------
@@ -901,7 +1283,7 @@ order of items.
 Now we would like to change the month labels on our discrete axis to be
 something more readable.
 
-    ggplot(data = monthly_counts, mapping = aes(x = as.factor(month), y = n, color = genus, group = genus)) +
+    ggplot(data = monthly_counts, mapping = aes(x = as.factor(month), y = n, color = Genus, group = Genus)) +
         geom_line() + 
         scale_x_discrete(labels=c("1"="Jan","2"="Feb.", "3"="Mar", "4"="April","5"="May",
                                   "6"="June","7"="July","8"="Aug", "9"="Sept","10"="Oct","11"="Nov",
@@ -909,263 +1291,8 @@ something more readable.
 
 ![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/change_month-1.png)
 
-Faceting
---------
-
-Faceting is a special technique in `ggplot2` that allows users to split
-one plot into several based on a factor of interest. There are two types
-of faceting:
-
--   `facet_wrap()` arranges a one-dimensional sequence of panels to
-    allow them to cleanly fit on one page.
--   `facet_grid()` allows you to form a matrix of rows and columns of
-    panels.
-
-For both, you specify the variables to facet by using the `vars()`
-function. For example `facet_wrap(facets=vars(facet_variable))` or
-`facet_grid(rows = vars(row_variable), cols = vars(col_variable))`.
-
-We can make a time series plot for each species by using the following
-facet.
-
-    ggplot(data= yearly_counts, mapping = aes(x= year, y = n)) +
-      geom_line() + 
-      facet_wrap(facets = vars(genus))
-
-![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/facet-1.png)
-
-Now we want to split each plot by the sex of the animals. To do this we
-make a counts plot grouped by `year`, `species_id`, and `sex`.
-
-    yearly_sex_counts <- surveys_complete %>% 
-      count(year, genus, sex) %>%
-      filter(sex != "") # remove empty rows, this may not be necessary
-
-Now we can plot a separate line for each sex using the `color` argument.
-
-    ggplot(data= yearly_sex_counts, mapping = aes(x= year, y = n, color = sex)) +
-      geom_line() + 
-      facet_wrap(facets = vars(genus))
-
-![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/facet_color-1.png)
-
-Now we can use `facet_grid` to split the plots by sex and organize the
-plots into rows and columns.
-
-    ggplot(data = yearly_sex_counts, mapping = aes(x = year, y = n, color = sex)) +
-      geom_line() +
-      facet_grid(rows= vars(sex), cols= vars(genus))
-
-![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/facet_grid-1.png)
-
-END OF DAY 1
-============
-
-Fill out stickies with things that went well, things that you would like
-to see more of.
-
-DAY 2: Begin with Erin
-======================
-
-Importing and working with messy data
-=====================================
-
-Now we will learn about reshaping messy data, such as what you might
-encounter during labs.
-
-Often people will make data tables that are not formatted best for use
-in R. So one of our first steps is reformatting the data in a "tidy" way
-that is suitable for loading into R.
-
-Two of the critical functions for doing this are `gather()` and
-`spread()`.
-
-Reshaping with gather and spread
---------------------------------
-
-When using spreadsheets with R, we try to follow these 4 rules for
-creating "tidy" data.
-
-1.  Each variable has its own column
-2.  Each observation has its own row
-3.  Each value must have its own cell
-4.  Each type of observational unit forms a table
-
-Animation about gather and spread. In long format you have one row for
-every observation, while in wide format the observations are condensed.
-
-<https://github.com/gadenbuie/tidyexplain>
-
-The `gather()` function takes wide data and gathers it into long format,
-while `spread()` takes long data and spreads it into long, where several
-variables are split up.
-
-Spreading
----------
-
-For example, if we were given a table where there was one genus column
-that we wanted to split into a table where each genus had its own column
-we would want to spread the data.
-
-`spread()` takes three arguments: 1. The data 2. The key column variable
-whose values will become new column names. 3. The value column variable
-whose values will fill the new column variables.
-
-Gathering
----------
-
-For example, if we were given the opposite situation with a table where
-there were multiple columns, one for each genus, and we wanted to
-condense them into into one column, we would use the `gather()`
-function. This function takes the following 4 arguments.
-
-1.  The data
-2.  The *key* column variable we wish to create from the column names
-3.  The *values* column variable we wish to create and fill with values
-    associated with they key.
-4.  The names of the columns we use to fill the key variable
-
-Our messy data
---------------
-
-Now we can pull up our messy data table in Excel and take a look.
-
-Some common problems we have when working on collaborative, long term
-projects is that common conventions for how to record variables can get
-lost.
-
-Common issues: 1. Dates in non-uniform formatting (DD/MM/YY vs.
-MM/DD/YYYY) 2. Capitalization and abbreviations ("male" vs "M") 3.
-Different systems for recoring a lack of data (NA vs. missing vs. 0)
-
-Though we can perform data cleaning in R, for a short data set we can
-hand clean our data in excel. Please go through the data and fix all
-issues you spot.
-
-With our data fixed we load in our data set.
-
-    messy_surveys_fixed <- read.csv("surveys_messier_fixed.csv", header=TRUE)
-    head(messy_surveys_fixed)
-
-    ##   X record_id month day year plot_id species_id sex weight   genus
-    ## 1 1         1     7  16 1977       2         NL   M     NA Neotoma
-    ## 2 2        72     8  19 1977       2         NL   M     NA Neotoma
-    ## 3 3       224     9  13 1977       2         NL         NA Neotoma
-    ## 4 4       266    10  16 1977       2         NL         NA Neotoma
-    ## 5 5       349    11  12 1977       2         NL         NA Neotoma
-    ## 6 6       363    11  12 1977       2         NL         NA Neotoma
-    ##    species   taxa Control Long.term.Krat.Exclosure Rodent.Exclosure
-    ## 1 albigula Rodent      32                       NA               NA
-    ## 2 albigula Rodent      31                       NA               NA
-    ## 3 albigula Rodent      NA                       NA               NA
-    ## 4 albigula Rodent      NA                        1               NA
-    ## 5 albigula Rodent      NA                       NA               NA
-    ## 6 albigula Rodent      NA                       NA                3
-    ##   Short.term.Krat.Exclosure Spectab.exclosure
-    ## 1                        NA                NA
-    ## 2                        NA                NA
-    ## 3                        NA                NA
-    ## 4                        NA                NA
-    ## 5                        NA                NA
-    ## 6                        NA                NA
-
-Now we see that currently there are multiple columns for each plot type.
-If we want to combine the plot types into a single column, we will need
-to use the `gather()` function.
-
-    messy_gathered <- messy_surveys_fixed %>% gather(key = plot_type, value = hindfoot_length, -c(plot_id, record_id, month, day, year, species_id, sex, weight, genus, species, taxa, X))
-
-    # the key is the variable whose values are column names
-    # the value is a variable whose values are currently spread (in our case the hind_foot_length data has been spread)
-    # the final argument contains the columns to ignore while gathering
-
-#### Steps to fix the new messy data
-
-### Recode step
-
-#### Using unique
-
-unique(messy\_data$sex)
-
-### Separate step for species
-
-### Spread measurement back out with the value column
-
-#### Code used to create messy data
-
-surveys\_messy &lt;- spread(surveys, plot\_type, hindfoot\_length)
-surveys\_messy &lt;- head(surveys\_messy, n=30)
-write.csv(file="surveys\_messy.csv", surveys\_messy)
-
-In excel I sprinkled in a few challenges that could occur when you have
-when multiple people are recording data
-
 Break 2: switch to Bob
 ======================
-
-Advanced plotting with ggplot
-=============================
-
-Changing ggplot themes
-----------------------
-
-`ggplot2` has several preloaded themes that can be used to change the
-appearance of plots. For example:
-
-    ggplot(data = yearly_sex_counts, mapping = aes(x = year, y = n, color= sex)) +
-      geom_line() +
-      facet_wrap(vars(genus)) + 
-      theme_bw()
-
-![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/ggplot_theme-1.png)
-
-Arranging and Exporting plots
------------------------------
-
-Faceting is great for splitting one plot into multiple, but you can also
-combine multiple plots using the `gridExtra` package. This package
-allows you to combine multiple plots into a single figure using
-`grid.arrange()`.
-
-    # install.packages("gridExtra")
-
-    library(gridExtra)
-
-    ## 
-    ## Attaching package: 'gridExtra'
-
-    ## The following object is masked from 'package:dplyr':
-    ## 
-    ##     combine
-
-    spp_weight_boxplot <- ggplot(data = surveys_complete, 
-                                 mapping = aes(x = genus, y = weight)) +
-      geom_boxplot() +
-      xlab("Genus") + ylab("Weight (g)") +
-      scale_y_log10() +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-    spp_count_plot <- ggplot(data = yearly_counts, 
-                             mapping = aes(x = year, y = n, color = genus)) +
-      geom_line() + 
-      xlab("Year") + ylab("Abundance")
-
-    grid.arrange(spp_weight_boxplot, spp_count_plot, ncol = 2, widths = c(4, 6)) # set the ncol and width 
-
-![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/install_grid-1.png)
-
-You can also save your plots with ggsave
-
-    combo_plot <- grid.arrange(spp_weight_boxplot, spp_count_plot, ncol = 2, widths = c(4, 6))
-
-![](Data_Carpentry_BioTA_Training_Lesson_files/figure-markdown_strict/export_plot-1.png)
-
-    ggsave("combo_plot_abun_weight.png", combo_plot, width = 10, dpi = 300)
-
-    ## Saving 10 x 5 in image
-
-Note that the `width` and `height` parameters determine the font size
-saved in the plot.
 
 Basic stats
 ===========
@@ -1175,12 +1302,6 @@ Basic stats
 ### Doing a basic linear model and plotting it
 
 Link together filtering, toy example
-
-Google sheets data loading and fixing
-=====================================
-
-Advanced ggplot code for calculating and adding error bars to a graph after you calculate the error
-===================================================================================================
 
 Calculating a line and adding the line to a geom plot
 =====================================================
