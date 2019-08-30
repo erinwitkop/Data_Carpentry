@@ -1,1 +1,50 @@
 # Day 2 Intro to R workshop 
+
+# Load tidyverse packages
+library(tidyverse)
+
+# Download data
+download.file(url="https://raw.githubusercontent.com/erinroberts/Data_Carpentry/master/messy_data.csv",  
+              destfile = "messy_data.csv")
+
+messy_data <- read_csv("messy_data.csv")
+
+# Inspect data
+head(messy_data)
+
+# View summary
+summary(messy_data)
+View(messy_data)
+
+# Fix sex column 
+unique(messy_data$sex) # view all sex options
+
+# Use recode() to fix sex column
+recode(messy_data$sex, "f"="F", "m"="M",
+       "MALE"="M","FEMALE"="F")
+messy_data$new_sex <- recode(messy_data$sex, "f"="F",
+                         "m"="M",
+                         "MALE"="M","FEMALE"="F")
+head(messy_data)
+
+# Separate genus and species into separate columns
+separate(messy_data, species, 
+         into = c("Genus","Species"),
+         sep = " ") %>% head()
+messy_data_separated <- separate(messy_data, species, 
+                                 into = c("Genus","Species"),
+                                 sep = " ")
+# Spread out measurement
+spread(messy_data_separated, measurement, value) %>% head()
+messy_data_separated_spread <- 
+  spread(messy_data_separated, measurement, value)
+
+# Remove rare species 
+species_counts <- messy_data_separated_spread %>%
+  count(species_id) %>%
+  filter(n >= 50)
+View(species_counts)
+
+messy_complete <- messy_data_separated_spread %>%
+  drop_na() %>%
+  filter(species_id %in% species_counts$species_id)
