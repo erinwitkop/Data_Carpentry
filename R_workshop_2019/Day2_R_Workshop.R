@@ -76,12 +76,21 @@ ggplot(monthly_counts, mapping = aes(x=month,
   geom_line()
 
 # change month to a factor
-ggplot(monthly_counts, 
+monthly_counts_plot <- ggplot(monthly_counts, 
        mapping = aes(x= as.factor(month),
        y=n, group = Genus, color = Genus)) +
   geom_line() +
   scale_x_discrete(labels=c("1"="Jan",
    "2"="Feb","3"="Mar", "4"="Apr", "5"="May",
    "6"="June","7"="July","8"="Aug","9"="Sept",
-   "10"="Oct", "11"="Nov","12"="Dec"))
+   "10"="Oct", "11"="Nov","12"="Dec")) +
+  xlab("Month") + ylab("Individuals in Each Genus") +
+  theme_bw() +
+  ggtitle("Montly counts for each Genus")
+monthly_counts_plot
+
+# Export plot
+ggsave("monthly_counts_plot.png",
+       monthly_counts_plot,
+       width = 10, dpi = 300)
 
