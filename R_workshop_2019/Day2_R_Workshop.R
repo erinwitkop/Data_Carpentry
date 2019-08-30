@@ -67,5 +67,21 @@ ggplot(data=yearly_counts, mapping = aes(x=year, y=n,
 # Plot the monthly counts for each genus as a timeseries, 
 # with each genus as its own color
 
+monthly_counts <- messy_complete %>% # put in correct name
+  count(month, Genus)
+head(monthly_counts)  
 
+ggplot(monthly_counts, mapping = aes(x=month,
+                                     y=n, color =Genus)) +
+  geom_line()
+
+# change month to a factor
+ggplot(monthly_counts, 
+       mapping = aes(x= as.factor(month),
+       y=n, group = Genus, color = Genus)) +
+  geom_line() +
+  scale_x_discrete(labels=c("1"="Jan",
+   "2"="Feb","3"="Mar", "4"="Apr", "5"="May",
+   "6"="June","7"="July","8"="Aug","9"="Sept",
+   "10"="Oct", "11"="Nov","12"="Dec"))
 
