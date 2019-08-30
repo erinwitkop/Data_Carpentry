@@ -56,4 +56,16 @@ yearly_counts <- messy_complete %>%
   count(year, Genus)
 View(yearly_counts)
 
-# Scatterplot of genus counts for each year 
+# Scatterplot of genus counts for each year
+ggplot(data=yearly_counts, mapping = aes(x=year, y=n)) + 
+  geom_point()
+
+ggplot(data=yearly_counts, mapping = aes(x=year, y=n,
+  color = Genus, group=Genus)) + 
+  geom_line()
+
+# Plot the monthly counts for each genus as a timeseries, 
+# with each genus as its own color
+
+
+
