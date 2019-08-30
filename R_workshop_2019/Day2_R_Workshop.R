@@ -94,3 +94,58 @@ ggsave("monthly_counts_plot.png",
        monthly_counts_plot,
        width = 10, dpi = 300)
 
+# Plotting continued
+# Load tidyverse
+library(tidyverse)
+
+# Download raw data
+download.file(url="https://ndownloader.figshare.com/files/2292169",
+              destfile = "portal_data_joined.csv")
+
+# Read in data
+surveys <- read_csv('portal_data_joined.csv')
+
+#Filter species with > 50 observations
+common_species <- surveys %>%  count(species_id) %>% filter(n>50) %>% pull(species_id)
+
+# Starting data = c('common_species_data','messy_complete')
+# Filter all data down to just those common species
+common_species_data  <- surveys %>% 
+  drop_na() %>% 
+  filter(species_id %in% common_species)
+
+# Calculate mean weight by plot_type * species_id
+common_species_data %>% group_by(plot_type,species_id) %>%
+  summarize(mean_weight=mean(weight)) %>%
+  spread(plot_type,value = mean_weight) %>% 
+  View()
+
+#Spread plot type into new columns
+spread_weights <- common_species_data %>% group_by(plot_type,species_id) %>%
+  summarize(mean_weight=mean(weight)) %>%
+  spread(plot_type,value = mean_weight)
+
+# Regather that data
+gathered_weights <- gather(spread_weights,
+                           key = "plot_type",
+                           value = mean_weight,
+                           -species_id) %>% View()
+
+# Find most common species
+common_species_data %>% count(species_id) %>% arrange(desc(n))
+
+# Filter to DM species
+most_common <- common_species_data %>% filter(species_id == "DM")
+
+# Plot violin plot for weight by sex
+ggplot(most_common,aes(x=sex,y=weight,group=sex)) +
+  geom_violin() + 
+  geom_jitter(alpha=0.2,aes(color=sex)) +
+  theme_bw()
+
+ggplot(common_species_data,aes(x=sex,y=weight,group=sex)) +
+  geom_violin() + 
+  geom_jitter(alpha=0.2,aes(color=sex)) +
+  theme_bw() +
+  facet_wrap(vars(species_id),scales = "free")
+
